@@ -1,0 +1,33 @@
+{
+	"name": "abitu-api",
+	"version": "0.1",
+	"description": "",
+	"main": "server.js",
+	"scripts": {
+		"start:dev": "nodemon ./src/server.js"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"eslint": "^7",
+		"eslint-config-airbnb-base": "^14",
+		"eslint-plugin-import": "^2",
+		"nodemon": "^2",
+		"prettier": "^2",
+		"morgan": "^1"
+	},
+	"dependencies": {
+		"dotenv": "^10.0.0",
+		"express": "^4.17.1",
+		"mongoose": "^5.13.2",
+		"koa": "^2.1",
+		"koa-body": "^4",
+		"koa-router": "^10",
+		"koa-session": "^6",
+		"koa-compose": "^4.1.0",
+		"passport": "^0.5",
+		"passport-local": "^1",
+		"helmet": "^5"
+	}
+}
