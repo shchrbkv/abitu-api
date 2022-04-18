@@ -59,7 +59,9 @@ exports.updateById = async (ctx, next) => {
 exports.deleteById = async (ctx, next) => {
 	const id = ctx.params.uni;
 	const deleted = await Uni.findByIdAndDelete(id).exec();
+
 	if (!deleted) ctx.throw(404, `No universities found with ID [${id}]`);
+	deleted.clearPrograms();
 
 	ctx.body = {
 		status: 'ok',

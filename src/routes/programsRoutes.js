@@ -9,4 +9,8 @@ router
 	.patch('/:program', controllers.programs.updateById)
 	.delete('/:program', controllers.programs.deleteById);
 
+const applicationsRoutes = require('./applicationsRoutes');
+
+router.use('/:program/applications', applicationsRoutes);
+
 module.exports = router.routes();

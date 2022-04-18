@@ -15,8 +15,10 @@ exports.getAll = async (ctx, next) => {
 };
 
 exports.create = async (ctx, next) => {
-	const data = ctx.request.body;
-	data.uni = ctx.params.uni || data.uni;
+	if (!ctx.params.uni) {
+		ctx.throw(400, "You can't create a program without Uni. Use /unis/:uni/programs.");
+	}
+	const data = { ...ctx.request.body, uni: ctx.params.uni };
 	const program = await Program.create(data);
 	ctx.body = {
 		status: 'ok',
@@ -57,6 +59,7 @@ exports.deleteById = async (ctx, next) => {
 	const deleted = await Program.findByIdAndDelete(id).exec();
 
 	if (!deleted) ctx.throw(404, `No programs found with ID [${id}]`);
+	deleted.clearApplications();
 
 	ctx.body = {
 		status: 'ok',

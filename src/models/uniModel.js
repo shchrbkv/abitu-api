@@ -77,17 +77,16 @@ uniSchema.virtual('programs', {
 	foreignField: 'uni',
 });
 
-uniSchema.pre(/^find/, function (next) {
-	this.select('-__v');
-	next();
-});
+uniSchema.methods.clearPrograms = async function () {
+	const programs = await mongoose.model('Program').find({ uni: this._id }).exec();
+	for (program of programs) program.clearApplications();
+	await mongoose.model('Program').deleteMany({ uni: this._id });
+};
 
-uniSchema.pre('findOneAndDelete', async function (next) {
-	// Delete all associated programs
-	const id = this._conditions._id;
-	await mongoose.model('Program').deleteMany({ uni: id });
-	next();
-});
+// uniSchema.pre(/^find/, function (next) {
+// 	this.select('-__v');
+// 	next();
+// });
 
 const Uni = mongoose.model('Uni', uniSchema);
 
