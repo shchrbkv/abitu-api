@@ -28,6 +28,8 @@
 		"koa-compose": "^4.1.0",
 		"passport": "^0.5",
 		"passport-local": "^1",
-		"helmet": "^5"
+		"helmet": "^5",
+		"api-query-params": "^5",
+		"koa-qs": "^3"
 	}
 }

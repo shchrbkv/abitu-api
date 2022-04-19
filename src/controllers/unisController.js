@@ -1,17 +1,27 @@
 const { Uni } = require('../models');
+const qb = require('../utils').queryBuilder;
+const aqp = require('api-query-params');
 
 const previewProgramFactory = (program) => {
 	return {
 		okso: program.okso,
 		title: program.title,
 		spots: program.stats.spots,
-		bound: program.stats.bound,
+		bound: program.stats.general.boundTotal,
 		exams: program.exams,
 	};
 };
 
 exports.getAll = async (ctx, next) => {
-	let unis = await Uni.find().lean().exec();
+	const query = ctx.query;
+
+	// Filtering
+	const filter = {};
+	if (query.city) filter.city = query.city;
+	if (query.amenities) filter.amenities = qb.asAll(qb.toArray(query.amenities));
+
+	const unis = await Uni.find(filter).lean().exec();
+
 	ctx.body = {
 		status: 'ok',
 		data: unis,

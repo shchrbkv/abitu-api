@@ -26,28 +26,30 @@ const applicationSchema = new mongoose.Schema(
 	{ timestamps: true }
 );
 
+applicationSchema.index({ 'score.total': -1, 'consent.status': -1 });
+
 // applicationSchema.pre(/^find/, function (next) {
 // 	this.select('-__v');
 // 	next();
 // });
 
-applicationSchema.pre('insertMany', async function (next, docs) {
-	const program = await mongoose.model('Program').findById(docs[0].program).lean().exec();
-	if (!program) throw new mongoose.Error(`Program with ID [${docs[0].program}] does not exist`);
-	for (doc of docs) {
-		doc.score.total = +doc.score.bonus;
-		for (score of Object.values(doc.score.exams)) doc.score.total += +score;
-	}
-});
-
-applicationSchema.post('insertMany', async function (docs) {
-	const program = await mongoose.model('Program').findById(docs[0].program).exec();
-	for (doc of docs) {
-		program.stats.status.applications.total++;
-		program.stats.status.applications[doc.way]++;
-	}
-	program.save();
-});
+// applicationSchema.pre('insertMany', async function (next, docs) {
+// 	const program = await mongoose.model('Program').findById(docs[0].program).lean().exec();
+// 	if (!program) throw new mongoose.Error(`Program with ID [${docs[0].program}] does not exist`);
+// 	for (doc of docs) {
+// 		doc.score.total = +doc.score.bonus;
+// 		for (score of Object.values(doc.score.exams)) doc.score.total += +score;
+// 	}
+// });
+//
+// applicationSchema.post('insertMany', async function (docs) {
+// 	const program = await mongoose.model('Program').findById(docs[0].program).exec();
+// 	for (doc of docs) {
+// 		program.stats.status.applications.total++;
+// 		program.stats.status.applications[doc.way]++;
+// 	}
+// 	program.save();
+// });
 
 const Application = mongoose.model('Application', applicationSchema);
 

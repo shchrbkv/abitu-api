@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-// const slugify = require('slugify');
+const slugify = require('slugify');
 
 const uniSchema = new mongoose.Schema(
 	{
@@ -39,11 +39,7 @@ const uniSchema = new mongoose.Schema(
 			min: [1, 'Специальностей не может быть меньше одной!'],
 			max: [10, 'Специальностей не может быть больше десяти!'],
 		},
-		amenities: {
-			dorm: { type: Boolean, required: true },
-			state: { type: Boolean, required: true },
-			military: { type: Boolean, required: true },
-		},
+		amenities: [{ type: String, enum: ['state', 'dorm', 'military'] }],
 		bonusWeight: {
 			gto: { type: Number, required: true },
 			medal: { type: Number, required: true },
@@ -83,10 +79,15 @@ uniSchema.methods.clearPrograms = async function () {
 	await mongoose.model('Program').deleteMany({ uni: this._id });
 };
 
-// uniSchema.pre(/^find/, function (next) {
-// 	this.select('-__v');
-// 	next();
-// });
+uniSchema.pre(/find/, function (next) {
+	this.select('-__v');
+	next();
+});
+
+uniSchema.pre('save', function (next) {
+	this.slug = slugify(this.title, { lower: true });
+	next();
+});
 
 const Uni = mongoose.model('Uni', uniSchema);
 

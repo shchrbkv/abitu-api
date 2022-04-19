@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-// const slugify = require('slugify');
 
 const programSchema = new mongoose.Schema({
 	uni: { type: mongoose.Schema.ObjectId, required: true, ref: 'Uni', index: true, immutable: true },
@@ -21,33 +20,32 @@ const programSchema = new mongoose.Schema({
 		maxlength: [256, 'Ссылка не должна превышать 256 символов!'],
 		minlength: [3, 'Ссылка не может быть короче 3 символов!'],
 	},
-	exams: {
-		type: [
-			{
-				type: String,
-				enum: [
-					'russian',
-					'math',
-					'mathAdv',
-					'physics',
-					'chemistry',
-					'history',
-					'socstud',
-					'cs',
-					'biology',
-					'geography',
-					'foreign',
-					'essay',
-					'contest',
-				],
-			},
-		],
-	},
+	exams: [
+		{
+			type: String,
+			enum: [
+				'russian',
+				'math',
+				'mathAdv',
+				'physics',
+				'chemistry',
+				'history',
+				'socstud',
+				'cs',
+				'biology',
+				'geography',
+				'foreign',
+				'essay',
+				'contest',
+			],
+		},
+	],
 	bonusWeight: Object,
 	timeline: Object,
 	stats: {
 		general: {
-			bound: {},
+			boundExams: { type: Map, of: { type: Number, min: 0, max: 100 } },
+			boundTotal: { type: Number, min: 0, max: 600 },
 			average: { type: Number, default: 69 },
 			spots: { type: Number, default: 69 },
 			retention: { type: Number, default: 69 },
@@ -88,12 +86,12 @@ programSchema.methods.clearApplications = async function () {
 	await mongoose.model('Application').deleteMany({ program: this._id });
 };
 
-// programSchema.pre(/^find/, function (next) {
-// 	this.select('-__v');
-// 	next();
-// });
+programSchema.pre(/find/, function (next) {
+	this.select('-__v');
+	next();
+});
 
-programSchema.pre('save', async function (next) {
+programSchema.pre('save', async function () {
 	if (this.uni) {
 		const uni = await mongoose.model('Uni').findById(this.uni).lean().exec();
 		if (!uni) throw new mongoose.Error(`Uni with ID [${this.uni}] does not exist`);

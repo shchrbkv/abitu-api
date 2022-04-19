@@ -4,6 +4,7 @@ module.exports = async (ctx, next) => {
 	} catch (err) {
 		status = ctx.status;
 		message = ctx.message;
+		console.error(err);
 		ctx.body = {
 			status: 'error',
 			error: err.message,

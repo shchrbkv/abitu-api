@@ -1,13 +1,19 @@
 const { Uni, Program } = require('../models');
+const qb = require('../utils').queryBuilder;
 
 exports.getAll = async (ctx, next) => {
-	let programs;
-	if (ctx.params.uni) {
-		const uniId = ctx.params.uni;
-		programs = await Program.find({ uni: uniId }).lean().exec();
-	} else {
-		programs = await Program.find({}).lean().exec();
-	}
+	const query = ctx.query;
+
+	// Filtering
+	const filter = {};
+	if (ctx.params.uni) filter.uni = ctx.params.uni;
+	if (query.okso) filter.okso = qb.asAll(qb.toArray(query.okso));
+	if (query.exams) filter.exams = qb.asAll(qb.toArray(query.exams));
+	if (query.bound) filter['stats.general.boundTotal'] = qb.toCondition(query.bound);
+
+	console.log(filter);
+
+	programs = await Program.find(filter).lean().exec();
 	ctx.body = {
 		status: 'ok',
 		data: programs,
