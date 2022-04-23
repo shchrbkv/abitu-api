@@ -1,5 +1,5 @@
 const { Application, Program } = require('../models');
-const qb = require('../utils').queryBuilder;
+const { queryBuilder: qb, fieldWhitelist: fw } = require('../utils');
 
 exports.getAll = async (ctx, next) => {
 	const query = ctx.query;
@@ -46,11 +46,25 @@ exports.create = async (ctx, next) => {
 	}
 
 	let data = ctx.request.body;
+
+	// Always as array
 	if (!Array.isArray(data)) data = [data];
+
+	const existing = await Application.find({ program }).lean().distinct('snils').exec();
+
+	// Iterate through all docs to format and filter existing ones
+	const pending = [];
 	for (doc of data) {
+		if (existing.includes(doc.snils)) continue;
+		doc = await fw(doc, ['snils', 'way', 'score', 'exams', 'stats']);
 		doc.program = ctx.params.program;
+		doc.updatedBy = ctx.state.user._id;
+		pending.push(doc);
 	}
-	const applications = await Application.insertMany(data);
+
+	// If exists update, if not — create
+	const applications = await Application.insertMany(pending);
+
 	ctx.body = {
 		status: 'ok',
 		data: applications,
@@ -71,7 +85,8 @@ exports.getById = async (ctx, next) => {
 
 exports.updateById = async (ctx, next) => {
 	const id = ctx.params.application;
-	const update = ctx.request.body;
+	const update = await fw(ctx.request.body, ['snils', 'way', 'score', 'exams', 'stats']);
+	update.updatedBy = ctx.state.user._id;
 	let updated = await Application.findByIdAndUpdate(id, update, {
 		new: true,
 		runValidators: true,

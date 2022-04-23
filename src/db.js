@@ -1,15 +1,11 @@
 const mongoose = require('mongoose');
 
 module.exports = {
-	connect: async (URI) => {
-		mongo = await mongoose.connect(URI, {
-			useNewUrlParser: true,
-			useCreateIndex: true,
-			useFindAndModify: false,
-			useUnifiedTopology: true,
-		});
-		connection = mongo.connections;
-		console.log(`MongoDB connection established: "${connection[0].name}"`);
-		return connection;
+	connect: async (config) => {
+		mongo = await mongoose.connect(config.mongoUri, config.mongoose);
+		mongoose.set('debug', config.env === 'development');
+		connections = mongo.connections;
+		console.log(`MongoDB connection established: "${connections[0].name}"`);
+		return connections;
 	},
 };

@@ -1,5 +1,5 @@
 const { Uni, Program } = require('../models');
-const qb = require('../utils').queryBuilder;
+const { queryBuilder: qb, fieldWhitelist: fw } = require('../utils');
 
 exports.getAll = async (ctx, next) => {
 	const query = ctx.query;
@@ -11,8 +11,6 @@ exports.getAll = async (ctx, next) => {
 	if (query.exams) filter.exams = qb.asAll(qb.toArray(query.exams));
 	if (query.bound) filter['stats.general.boundTotal'] = qb.toCondition(query.bound);
 
-	console.log(filter);
-
 	programs = await Program.find(filter).lean().exec();
 	ctx.body = {
 		status: 'ok',
@@ -21,10 +19,14 @@ exports.getAll = async (ctx, next) => {
 };
 
 exports.create = async (ctx, next) => {
-	if (!ctx.params.uni) {
-		ctx.throw(400, "You can't create a program without Uni. Use /unis/:uni/programs.");
-	}
-	const data = { ...ctx.request.body, uni: ctx.params.uni };
+	if (!ctx.params.uni) ctx.throw(400, "You can't create a program without Uni. Use /unis/:uni/programs.");
+	let data = await fw(ctx.request.body, ['okso', 'title', 'website', 'exams', 'stats']);
+	data = {
+		...data,
+		uni: ctx.params.uni,
+		stats: { general: data.stats },
+		updatedBy: ctx.state.user._id,
+	};
 	const program = await Program.create(data);
 	ctx.body = {
 		status: 'ok',
@@ -46,7 +48,9 @@ exports.getById = async (ctx, next) => {
 
 exports.updateById = async (ctx, next) => {
 	const id = ctx.params.program;
-	const update = ctx.request.body;
+	const update = await fw(ctx.request.body, ['okso', 'title', 'website', 'exams', 'stats']);
+	if (update.stats) update.stats = { general: data.stats };
+	update.updatedBy = ctx.state.user._id;
 	let updated = await Program.findByIdAndUpdate(id, update, {
 		new: true,
 		runValidators: true,

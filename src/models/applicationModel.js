@@ -7,7 +7,6 @@ const applicationSchema = new mongoose.Schema(
 			required: [true, 'У заявления должен быть СНИЛС!'],
 			match: [/^\d{3}-\d{3}-\d{3}-\d{2}/, 'Формат не поддерживается! (XXX-XXX-XXX-XX)'],
 			immutable: true,
-			index: true,
 		},
 		program: { type: mongoose.Schema.ObjectId, required: true, ref: 'Uni', immutable: true },
 		way: { type: String, enum: ['main', 'direct', 'quota', 'target'], required: true },
@@ -22,16 +21,18 @@ const applicationSchema = new mongoose.Schema(
 			status: { type: Boolean, default: false },
 			changed: { type: Date },
 		},
+		updatedBy: { type: mongoose.Schema.ObjectId, required: true, ref: 'User' },
 	},
 	{ timestamps: true }
 );
 
 applicationSchema.index({ 'score.total': -1, 'consent.status': -1 });
+applicationSchema.index({ 'snils': 1, 'program': 1 }, { unique: true });
 
-// applicationSchema.pre(/^find/, function (next) {
-// 	this.select('-__v');
-// 	next();
-// });
+applicationSchema.pre(/^find/, function (next) {
+	this.select('-__v');
+	next();
+});
 
 // applicationSchema.pre('insertMany', async function (next, docs) {
 // 	const program = await mongoose.model('Program').findById(docs[0].program).lean().exec();

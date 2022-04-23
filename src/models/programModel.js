@@ -44,8 +44,9 @@ const programSchema = new mongoose.Schema({
 	timeline: Object,
 	stats: {
 		general: {
-			boundExams: { type: Map, of: { type: Number, min: 0, max: 100 } },
-			boundTotal: { type: Number, min: 0, max: 600 },
+			boundExams: { type: Map, of: { type: Number, min: 0, max: 100, default: 0 } },
+			boundBonus: { type: Number, min: 0, max: 10, default: 0 },
+			boundTotal: { type: Number, min: 0, max: 600, default: 0 },
 			average: { type: Number, default: 69 },
 			spots: { type: Number, default: 69 },
 			retention: { type: Number, default: 69 },
@@ -56,9 +57,9 @@ const programSchema = new mongoose.Schema({
 				consent: [{ type: Number, default: 0 }],
 			},
 		},
-		analytics: {},
+		/* COMPUTED VALUES FOR TOTAL PICTURE
 		status: {
-			applications: {
+			applications: {s
 				total: { type: Number, default: 0 },
 				main: { type: Number, default: 0 },
 				direct: { type: Number, default: 0 },
@@ -79,7 +80,9 @@ const programSchema = new mongoose.Schema({
 				},
 			},
 		},
+		*/
 	},
+	updatedBy: { type: mongoose.Schema.ObjectId, required: true, ref: 'User' },
 });
 
 programSchema.methods.clearApplications = async function () {
@@ -91,13 +94,18 @@ programSchema.pre(/find/, function (next) {
 	next();
 });
 
-programSchema.pre('save', async function () {
+programSchema.pre('save', async function (next) {
 	if (this.uni) {
 		const uni = await mongoose.model('Uni').findById(this.uni).lean().exec();
 		if (!uni) throw new mongoose.Error(`Uni with ID [${this.uni}] does not exist`);
 		this.timeline = uni.timeline;
 		this.bonusWeight = uni.bonusWeight;
+		const general = this.stats.general;
+		if (!general.boundTotal)
+			general.boundTotal =
+				Array.from(general.boundExams.values()).reduce((cur, acc) => cur + acc, 0) + general.boundBonus;
 	}
+	next();
 });
 
 const Program = mongoose.model('Program', programSchema);
