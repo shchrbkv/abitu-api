@@ -35,10 +35,15 @@ exports.refreshTokens = async (ctx, user, config) => {
 
 	user.refreshToken = tokens.refresh;
 
-	return await user.save();
+	await user.save();
+
+	user.refreshToken = undefined;
+	user.password = undefined;
+
+	return user;
 };
 
-exports.clearTokens = async (ctx, user, config) => {
+exports.clearTokenCookies = async (ctx) => {
 	ctx.cookies.set('jwtAccess', '', {
 		expires: Date.now(),
 		httpOnly: true,
@@ -51,10 +56,6 @@ exports.clearTokens = async (ctx, user, config) => {
 		path: '/auth',
 		// secure: true,
 	});
-
-	delete user.refreshToken;
-
-	return await user.save();
 };
 
-exports.errors = { expired: jwt.TokenExpiredError, token: jwt.JsonWebTokenError };
+exports.errors = { expired: jwt.TokenExpiredError, invalid: jwt.JsonWebTokenError };

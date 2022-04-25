@@ -12,6 +12,9 @@ exports.getAll = async (ctx, next) => {
 	if (query.bound) filter['stats.general.boundTotal'] = qb.toCondition(query.bound);
 
 	programs = await Program.find(filter).lean().exec();
+
+	if (!programs) ctx.throw(404, 'No programs found');
+
 	ctx.body = {
 		status: 'ok',
 		data: programs,

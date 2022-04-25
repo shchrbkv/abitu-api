@@ -13,10 +13,9 @@ router.use('/:uni/programs', programsRoutes);
 router.use(clearance.auth);
 
 // Admin zone
-router
-	.use(clearance.for('admin'))
-	.post('/', controllers.unis.create)
-	.patch('/:uni', controllers.unis.updateById)
-	.delete('/:uni', controllers.unis.deleteById);
+router.use(clearance.for('admin')).post('/', controllers.unis.create).delete('/:uni', controllers.unis.deleteById);
+
+// Restricted zone
+router.use(clearance.for('editor')).patch('/:uni', controllers.unis.updateById);
 
 module.exports = router.routes();

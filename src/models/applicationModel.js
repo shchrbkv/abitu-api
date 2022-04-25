@@ -14,7 +14,7 @@ const applicationSchema = new mongoose.Schema(
 		score: {
 			total: { type: Number },
 			bonus: { type: Number, default: 0, min: 0, max: 10 },
-			exams: { type: Map, of: { type: Number, min: 0, max: 100 }, required: true },
+			exams: { type: Map, of: { type: Number, min: 0, max: 100 } },
 		},
 		index: { current: { type: Number, index: -1 }, last: Number },
 		consent: {

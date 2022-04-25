@@ -17,4 +17,5 @@ module.exports = {
 		refresh: { secret: process.env.JWT_REFRESH, expires: process.env.JWT_REFRESH_EXPIRES },
 		access: { secret: process.env.JWT_ACCESS, expires: process.env.JWT_ACCESS_EXPIRES },
 	},
+	roles: process.env.ROLES.split(','),
 };

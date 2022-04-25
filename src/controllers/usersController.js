@@ -1,18 +1,62 @@
 const { User } = require('../models');
-const config = require('../config');
-const { jwtToolbox } = require('../utils');
+const { queryBuilder: qb, fieldWhitelist: fw } = require('../utils');
 
-exports.getAll = async (ctx, next) => {};
+exports.getAll = async (ctx, next) => {
+	users = await User.find().select('+refreshToken +loginAt +registeredAt +passwordChangedAt').lean().exec();
 
-exports.register = async (ctx, next) => {
-	const user = await User.create({
-		email: ctx.request.body.email,
-		password: ctx.request.body.password,
-	});
+	if (!users) ctx.throw(404, 'No users found');
 
-	ctx.status = 201;
 	ctx.body = {
 		status: 'ok',
-		data: await jwtToolbox.refreshTokens(ctx, user, config.jwt),
+		data: users,
+	};
+};
+
+exports.create = async (ctx, next) => {
+	let data = await fw(ctx.request.body, ['role', 'email', 'password']);
+	const user = await User.create(data);
+	ctx.body = {
+		status: 'ok',
+		data: user,
+	};
+};
+
+exports.getById = async (ctx, next) => {
+	const id = ctx.params.user;
+	const user = await User.findById(id).select('+refreshToken +loginAt +registeredAt +passwordChangedAt').lean().exec();
+
+	if (!user) ctx.throw(404, `No users found with ID [${id}]`);
+
+	ctx.body = {
+		status: 'ok',
+		data: user,
+	};
+};
+
+exports.updateById = async (ctx, next) => {
+	const id = ctx.params.user;
+	const update = await fw(ctx.request.body, ['role', 'email', 'password', 'refreshToken']);
+	let updated = await User.findByIdAndUpdate(id, update, {
+		new: true,
+		runValidators: true,
+	}).exec();
+
+	if (!updated) ctx.throw(404, `No users found with ID [${id}]`);
+
+	ctx.body = {
+		status: 'ok',
+		data: updated,
+	};
+};
+
+exports.deleteById = async (ctx, next) => {
+	const id = ctx.params.user;
+	const deleted = await User.findByIdAndDelete(id).exec();
+
+	if (!deleted) ctx.throw(404, `No users found with ID [${id}]`);
+
+	ctx.body = {
+		status: 'ok',
+		data: null,
 	};
 };

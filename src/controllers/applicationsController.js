@@ -33,6 +33,8 @@ exports.getAll = async (ctx, next) => {
 
 	const applications = await Application.find(filter).sort(sort).limit(limit).lean().exec();
 
+	if (!applications) ctx.throw(404, 'No applications found');
+
 	ctx.body = {
 		status: 'ok',
 		data: applications,

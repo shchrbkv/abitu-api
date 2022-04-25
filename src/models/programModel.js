@@ -57,7 +57,7 @@ const programSchema = new mongoose.Schema({
 				consent: [{ type: Number, default: 0 }],
 			},
 		},
-		/* COMPUTED VALUES FOR TOTAL PICTURE
+		/* COMPUTED VALUES FOR REFERENCE
 		status: {
 			applications: {s
 				total: { type: Number, default: 0 },

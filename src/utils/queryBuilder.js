@@ -1,3 +1,5 @@
+const { ObjectId } = require('mongoose').Types;
+
 exports.toCondition = (object) => {
 	const operators = {};
 	for (op of Object.keys(object)) {
@@ -31,9 +33,13 @@ exports.asAll = (array) => ({ $all: array });
 
 exports.asOr = (array) => ({ $or: array });
 
+exports.asPush = (array) => ({ $push: array });
+
 exports.castPage = (page = 1, limit = 100) => ({ skip: (+page - 1) * +limit, limit: +limit });
 
 exports.toNeighbors = (sortMode, sortDir, lastVal, lastId) => [
 	{ [sortMode]: { [sortDir]: lastVal } },
 	{ [sortMode]: lastVal, _id: { [sortDir]: lastId } },
 ];
+
+exports.toObjectId = (val) => ObjectId(val);

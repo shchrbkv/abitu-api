@@ -4,8 +4,15 @@ const { clearance } = require('../utils');
 
 const router = new Router();
 
-router.get('/', controllers.auth.refresh).post('/', controllers.auth.login);
+router.get('/', controllers.auth.refresh).put('/', controllers.auth.login).post('/', controllers.auth.register);
 
-router.use(clearance.auth).delete('/', controllers.auth.logout);
+// Authenticated
+router.use(clearance.auth);
+router.delete('/', controllers.auth.logout);
+
+router
+	.get('/me', controllers.auth.getMe)
+	.patch('/me', controllers.auth.updateMe)
+	.delete('/me', controllers.auth.deleteMe);
 
 module.exports = router.routes();

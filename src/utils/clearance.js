@@ -7,15 +7,15 @@ exports.auth = async (ctx, next) => {
 	const accessToken = ctx.cookies.get('jwtAccess');
 
 	// Check if cookie exists
-	if (!accessToken) ctx.throw(400, 'Request has no access token');
+	if (!accessToken) ctx.throw(400, 'No access token: please login or refresh');
 
 	// Try verifying against access secret
 	let payload;
 	try {
 		payload = await jwtToolbox.verifyToken(accessToken, jwt.access);
 	} catch (err) {
-		if (err instanceof jwtToolbox.errors.expired) ctx.throw(401, 'Access token has expired, please refresh at /auth');
-		if (err instanceof jwtToolbox.errors.token) ctx.throw(400, 'Bad access token');
+		if (err instanceof jwtToolbox.errors.expired) ctx.throw(401, 'Access token has expired: please refresh at /auth');
+		if (err instanceof jwtToolbox.errors.invalid) ctx.throw(400, 'Bad access token');
 	}
 
 	// Build user from payload

@@ -22,6 +22,8 @@ exports.getAll = async (ctx, next) => {
 
 	const unis = await Uni.find(filter).lean().exec();
 
+	if (!unis) ctx.throw(404, 'No unis found');
+
 	ctx.body = {
 		status: 'ok',
 		data: unis,
